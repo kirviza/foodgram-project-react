@@ -1,10 +1,10 @@
 from tabnanny import verbose
 from django.db import models
 from django.core.validators import MinValueValidator
+from django.contrib.auth import get_user_model
 
-from users.models import User
 
-
+User = get_user_model()
 
 class Tag(models.Model):
     name = models.CharField(
@@ -108,7 +108,7 @@ class IngredientRecipe(models.Model):
         verbose_name='Ингредиент в рецепте'
     )
     amount = models.PositiveIntegerField(
-        verbose_name='Количество',
+        verbose_name='Количество'
     )
 
     class Meta:
@@ -118,22 +118,71 @@ class IngredientRecipe(models.Model):
         return '{}, {}'.format(self.ingredient, self.amount)
 
 
-class ShoppingCart(models.Model):
-    user = models.OneToOneField(
+class Favorite(models.Model):
+    user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='shopping_cart',
+        related_name='favorites',
         verbose_name='Пользователь',
     )
-    recipes = models.ManyToManyField(
+    recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='shopping_cart',
-        verbose_name='Рецепты',
+        related_name='favorites',
+        verbose_name='Рецепт',
     )
 
     class Meta:
-        verbose_name = 'Список покупок'
+        ordering = ['user']
+        verbose_name = 'Избранное'
 
     def __str__(self):
-        return f'{self.user}'
+        return f'{self.user} -> {self.recipe}'
+
+
+class Follow(models.Model):
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='follower',
+        verbose_name='qwe'
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='followed',
+        verbose_name='asd'
+    )
+
+    class Meta:
+        ordering = ['user']
+        verbose_name = 'Подписки'
+
+    def __str__(self):
+        return (f"Автор {self.author.username}, "
+                f"последователь {self.user.username}")
+
+
+class Purchase(models.Model):
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='purchases',
+        verbose_name='пользователь'
+    )
+
+    recipes = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='purchases',
+        verbose_name='рецепты'
+    )
+
+    class Meta:
+        verbose_name = 'покупка'
+
+    def __str__(self):
+        ls = ''.join(list(self.objects.list(self.user)))
+        return f"Пользователь {self.user.username}, покупки {ls}"

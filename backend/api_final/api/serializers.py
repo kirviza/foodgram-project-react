@@ -1,12 +1,14 @@
 from dataclasses import field
+from django.contrib.auth.hashers import make_password
 from rest_framework import serializers
-from rest_framework.relations import SlugRelatedField
-from rest_framework.validators import UniqueValidator
 from drf_extra_fields.fields import Base64ImageField
 
 
 from recipes.models import Ingredient, Tag, Recipe, IngredientRecipe
-from users.models import User
+from recipes.models import Favorite, Follow, Purchase
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 
 class IngredientSerializer(serializers.ModelSerializer):
@@ -34,7 +36,7 @@ class IngredientRecipeSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    is_subscribed = SerializerMethodField('is_subscribed_user')
+    is_subscribed = serializers.SerializerMethodField('is_subscribed_user')
 
     class Meta:
         model = User
@@ -78,4 +80,28 @@ class RecipeSerializer(serializers.ModelSerializer):
             'id', 'tags', 'author',
             'ingredients', 'image', 'name',
             'text', 'time'
+        )
+
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Favorite
+        fields = (
+            'id'
+        )
+
+
+class FollowSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Follow
+        fields = (
+            'id'
+        )
+
+
+class PurchaseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Purchase
+        fields = (
+            'id'
         )

@@ -11,6 +11,3 @@ pytz==2020.1
 sqlparse==0.3.1
 requests==2.26.0
 djoser==2.1.0
-pytest==6.2.4
-pytest-django==4.4.0
-pytest-pythonpath==0.7.3

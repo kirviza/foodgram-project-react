@@ -5,6 +5,7 @@ from rest_framework.response import Response
 
 from recipes.models import Ingredient, Tag, Recipe
 from .serializers import IngredientSerializer, TagSerializer, RecipeSerializer
+from .serializers import FavoriteSerializer, FollowSerializer, PurchaseSerializer
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
@@ -23,3 +24,21 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     pagination_class = None
     serializer_class = RecipeSerializer
+
+
+class FavoriteViewSet(viewsets.ModelViewSet):
+    queryset = Recipe.objects.all()
+    pagination_class = None
+    serializer_class = FavoriteSerializer
+
+
+class FollowViewSet(viewsets.ModelViewSet):
+    queryset = Recipe.objects.all()
+    pagination_class = None
+    serializer_class = FollowSerializer
+
+
+class PurchaseViewSet(viewsets.ModelViewSet):
+    queryset = Recipe.objects.all()
+    pagination_class = None
+    serializer_class = PurchaseSerializer
