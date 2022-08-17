@@ -6,20 +6,23 @@ class User(AbstractUser):
     email = models.EmailField(
         'Email',
         max_length=200,
-        unique=True,)
+        unique=True
+    )
     first_name = models.CharField(
         'Имя',
-        max_length=150)
+        max_length=150
+    )
     last_name = models.CharField(
         'Фамилия',
-        max_length=150)
+        max_length=150
+    )
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
 
     class Meta:
         verbose_name = 'Пользователь'
-        ordering = ('id',)
+        ordering = ['id']
 
     def __str__(self):
         return self.email
