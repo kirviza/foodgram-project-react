@@ -5,10 +5,10 @@ from django.shortcuts import get_object_or_404
 from drf_base64.fields import Base64ImageField
 from rest_framework import serializers
 
-from recipes.models import Ingredient, Recipe, IngredientRecipe, Follow, Tag
+from recipes.models import Ingredient, Recipe, RecipeIngredient, Subscribe, Tag
 
 User = get_user_model()
-ERR_MSG = 'Не удается войти в систему с предоставленными учетными данными.'
+ERR_MSG = 'Проверьте учетные данные.'
 
 
 class IngredientSerializer(serializers.ModelSerializer):
@@ -18,25 +18,25 @@ class IngredientSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class RecipeIngredientSerializer(serializers.ModelSerializer):
+    id = serializers.ReadOnlyField(
+        source='ingredient.id')
+    name = serializers.ReadOnlyField(
+        source='ingredient.name')
+    measurement_unit = serializers.ReadOnlyField(
+        source='ingredient.measurement_unit')
+
+    class Meta:
+        model = RecipeIngredient
+        fields = (
+            'id', 'name', 'measurement_unit', 'amount')
+
+
 class TagSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tag
         fields = ('id', 'name', 'color', 'slug')
-
-
-
-class IngredientRecipeSerializer(serializers.ModelSerializer):
-    id = serializers.ReadOnlyField(
-        source='ingredient.id')
-    name = serializers.ReadOnlyField(
-        source='ingredient.name')
-    unit = serializers.ReadOnlyField(
-        source='ingredient.unit')
-
-    class Meta:
-        model = IngredientRecipe
-        fields = ('id', 'name', 'measurement_unit', 'amount')
 
 
 class TokenSerializer(serializers.Serializer):
@@ -212,7 +212,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
 
     def create_ingredients(self, ingredients, recipe):
         for ingredient in ingredients:
-            IngredientRecipe.objects.create(
+            RecipeIngredient.objects.create(
                 recipe=recipe,
                 ingredient_id=ingredient.get('id'),
                 amount=ingredient.get('amount'), )
@@ -252,13 +252,13 @@ class RecipeReadSerializer(serializers.ModelSerializer):
     author = RecipeUserSerializer(
         read_only=True,
         default=serializers.CurrentUserDefault())
-    ingredients = IngredientRecipeSerializer(
+    ingredients = RecipeIngredientSerializer(
         many=True,
         required=True,
         source='recipe')
     is_favorited = serializers.BooleanField(
         read_only=True)
-    is_in_shopping_cart = serializers.BooleanField(
+    is_shopping_cart = serializers.BooleanField(
         read_only=True)
 
     class Meta:
@@ -284,24 +284,24 @@ class SubscribeSerializer(serializers.ModelSerializer):
         source='author.first_name')
     last_name = serializers.CharField(
         source='author.last_name')
-    recipes = serializers.SerializerMethodField()
+    recipe = serializers.SerializerMethodField()
     is_subscribed = serializers.BooleanField(
         read_only=True)
     recipes_count = serializers.IntegerField(
         read_only=True)
 
     class Meta:
-        model = Follow
+        model = Subscribe
         fields = (
             'email', 'id', 'username', 'first_name', 'last_name',
-            'is_subscribed', 'recipes', 'recipes_count',)
+            'is_subscribed', 'recipe', 'recipes_count',)
 
     def get_recipes(self, obj):
         request = self.context.get('request')
         limit = request.GET.get('recipes_limit')
-        recipes = (
+        recipe = (
             obj.author.recipe.all()[:int(limit)] if limit
             else obj.author.recipe.all())
         return SubscribeRecipeSerializer(
-            recipes,
+            recipe,
             many=True).data

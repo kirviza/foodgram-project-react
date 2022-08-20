@@ -21,8 +21,8 @@ from rest_framework.response import Response
 
 from api.filters import IngredientFilter, RecipeFilter
 from api.permissions import IsAdminOrReadOnly
-from recipes.models import (Favorite, Ingredient, Recipe, Purchase,
-                            Follow, Tag)
+from recipes.models import (FavoriteRecipe, Ingredient, Recipe, ShoppingCart,
+                            Subscribe, Tag)
 from .serializers import (IngredientSerializer, RecipeReadSerializer,
                           RecipeWriteSerializer, SubscribeRecipeSerializer,
                           SubscribeSerializer, TagSerializer, TokenSerializer,
@@ -51,24 +51,28 @@ class PermissionAndPaginationMixin:
     permission_classes = (IsAdminOrReadOnly,)
     pagination_class = None
 
-class IngredientViewSet(
+
+class IngredientsViewSet(
         PermissionAndPaginationMixin,
         viewsets.ModelViewSet):
+    """Список ингредиентов."""
 
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     filterset_class = IngredientFilter
 
 
-class TagViewSet(
+class TagsViewSet(
         PermissionAndPaginationMixin,
         viewsets.ModelViewSet):
+    """Список тэгов."""
 
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
 
 
-class RecipeViewSet(viewsets.ModelViewSet):
+class RecipesViewSet(viewsets.ModelViewSet):
+    """Рецепты."""
 
     queryset = Recipe.objects.all()
     filterset_class = RecipeFilter
@@ -82,17 +86,18 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return Recipe.objects.annotate(
             is_favorited=Exists(
-                Favorite.objects.filter(
-                    user=self.request.user, recipe=OuterRef('id'))),
-            is_in_shopping_cart=Exists(
-                Purchase.objects.filter(
+                FavoriteRecipe.objects.filter(
+                    user=self.request.user,
+                    recipe=OuterRef('id'))),
+            is_shopping_cart=Exists(
+                ShoppingCart.objects.filter(
                     user=self.request.user,
                     recipe=OuterRef('id')))
         ).select_related('author').prefetch_related(
             'tags', 'ingredients', 'recipe',
             'shopping_cart', 'favorite_recipe'
         ) if self.request.user.is_authenticated else Recipe.objects.annotate(
-            is_in_shopping_cart=Value(False),
+            is_shopping_cart=Value(False),
             is_favorited=Value(False),
         ).select_related('author').prefetch_related(
             'tags', 'ingredients', 'recipe',
@@ -178,7 +183,7 @@ class UsersViewSet(UserViewSet):
         """Получить на кого пользователь подписан."""
 
         user = request.user
-        queryset = Follow.objects.filter(user=user)
+        queryset = Subscribe.objects.filter(user=user)
         pages = self.paginate_queryset(queryset)
         serializer = SubscribeSerializer(
             pages, many=True,

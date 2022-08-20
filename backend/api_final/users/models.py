@@ -10,11 +10,11 @@ class User(AbstractUser):
     )
     first_name = models.CharField(
         'Имя',
-        max_length=150
+        max_length=50
     )
     last_name = models.CharField(
         'Фамилия',
-        max_length=150
+        max_length=50
     )
 
     USERNAME_FIELD = 'email'

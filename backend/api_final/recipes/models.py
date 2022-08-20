@@ -38,7 +38,7 @@ class Ingredient(models.Model):
         max_length=200,
         verbose_name='Ингредиент'
     )
-    unit = models.CharField(
+    measurement_unit = models.CharField(
         max_length=10,
         verbose_name='Eдиницы измерения'
     )
@@ -48,7 +48,7 @@ class Ingredient(models.Model):
         verbose_name = 'Ингредиент'
 
     def __str__(self):
-        return f'{self.name}, {self.unit}'
+        return f'{self.name}, {self.measurement_unit}'
 
 
 class Recipe(models.Model):
@@ -63,7 +63,7 @@ class Recipe(models.Model):
         verbose_name='Рецепт'
     )
     text = models.TextField(verbose_name='Описание')
-    time = models.PositiveIntegerField(
+    cooking_time = models.PositiveIntegerField(
         validators=[MinValueValidator(1)],
         verbose_name='Время готовки'
     )
@@ -83,7 +83,7 @@ class Recipe(models.Model):
     )
     ingredients = models.ManyToManyField(
         Ingredient,
-        through='IngredientRecipe',
+        through='RecipeIngredient',
         verbose_name='Состав'
     )
 
@@ -95,7 +95,7 @@ class Recipe(models.Model):
         return f'{self.author.email}, {self.name}'
 
 
-class IngredientRecipe(models.Model):
+class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
@@ -123,19 +123,20 @@ class IngredientRecipe(models.Model):
                 name='unique ingredient')]
 
 
-class Favorite(models.Model):
+class FavoriteRecipe(models.Model):
     user = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
         null=True,
-        related_name='favorites',
+        related_name='favorite_recipe',
         verbose_name='Пользователь',
     )
     recipe = models.ManyToManyField(
         Recipe,
-        related_name='favorites',
+        related_name='favorite_recipe',
         verbose_name='Любимый рецепт',
     )
+    
 
     class Meta:
         verbose_name = 'Избранное'
@@ -148,10 +149,10 @@ class Favorite(models.Model):
     def create_favorite_recipe(
             sender, instance, created, **kwargs):
         if created:
-            return Favorite.objects.create(user=instance)
+            return FavoriteRecipe.objects.create(user=instance)
 
 
-class Follow(models.Model):
+class Subscribe(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -163,6 +164,10 @@ class Follow(models.Model):
         on_delete=models.CASCADE,
         related_name='following',
         verbose_name='Автор'
+    )
+    created = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата подписки'
     )
 
     class Meta:
@@ -177,18 +182,18 @@ class Follow(models.Model):
         return f'Автор {self.author}, Подписчик {self.user}'
 
 
-class Purchase(models.Model):
-    user = models.ForeignKey(
+class ShoppingCart(models.Model):
+    user = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
-        related_name='purchases',
         null=True,
+        related_name='shopping_cart',
         verbose_name='Пользователь'
     )
 
-    recipes = models.ManyToManyField(
+    recipe = models.ManyToManyField(
         Recipe,
-        related_name='purchases',
+        related_name='shopping_cart',
         verbose_name='Рецепты'
     )
 
@@ -201,7 +206,7 @@ class Purchase(models.Model):
         return f'Пользователь {self.user} добавил {list_} в покупки.'
 
     @receiver(post_save, sender=User)
-    def create_purchase_list(
+    def create_shopping_cart(
             sender, instance, created, **kwargs):
         if created:
-            return Purchase.objects.create(user=instance)
+            return ShoppingCart.objects.create(user=instance)
