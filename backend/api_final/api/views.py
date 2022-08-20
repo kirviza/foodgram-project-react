@@ -32,6 +32,7 @@ from .serializers import (IngredientSerializer, RecipeReadSerializer,
 User = get_user_model()
 FILENAME = 'shoppingcart.pdf'
 
+
 class GetObjectMixin:
     """Миксина для удаления/добавления рецептов избранных/корзины."""
 

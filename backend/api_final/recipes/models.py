@@ -136,7 +136,6 @@ class FavoriteRecipe(models.Model):
         related_name='favorite_recipe',
         verbose_name='Любимый рецепт',
     )
-    
 
     class Meta:
         verbose_name = 'Избранное'

@@ -296,7 +296,7 @@ class SubscribeSerializer(serializers.ModelSerializer):
             'email', 'id', 'username', 'first_name', 'last_name',
             'is_subscribed', 'recipe', 'recipes_count',)
 
-    def get_recipes(self, obj):
+    def get_recipe(self, obj):
         request = self.context.get('request')
         limit = request.GET.get('recipes_limit')
         recipe = (
