@@ -1,0 +1,4 @@
+FONT_NAME = 'Vera'
+FONT_FILE_NAME = 'Vera.ttf'
+FONT_SIZE = 24
+PAGE_SIZE = 6

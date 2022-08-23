@@ -20,6 +20,7 @@ from rest_framework.permissions import (
 )
 from rest_framework.response import Response
 
+from api.constans import FONT_FILE_NAME, FONT_NAME, FONT_SIZE
 from api.filters import IngredientFilter, RecipeFilter
 from api.permissions import IsAdminOrReadOnly
 from recipes.models import (
@@ -92,27 +93,37 @@ class RecipesViewSet(viewsets.ModelViewSet):
         return RecipeWriteSerializer
 
     def get_queryset(self):
-        return Recipe.objects.annotate(
-            is_favorited=Exists(
-                FavoriteRecipe.objects.filter(
-                    user=self.request.user,
-                    recipe=OuterRef('id'))),
-            is_shopping_cart=Exists(
-                ShoppingCart.objects.filter(
-                    user=self.request.user,
-                    recipe=OuterRef('id')))
-        ).select_related('author').prefetch_related(
-            'tags', 'ingredients', 'recipe',
-            'shopping_cart', 'favorite_recipe'
-        ) if self.request.user.is_authenticated else Recipe.objects.annotate(
-            is_shopping_cart=Value(False),
-            is_favorited=Value(False),
-        ).select_related('author').prefetch_related(
-            'tags', 'ingredients', 'recipe',
-            'shopping_cart', 'favorite_recipe')
+        if self.request.user.is_authenticated:
+            return Recipe.objects.annotate(
+                is_favorited=Exists(
+                    FavoriteRecipe.objects.filter(
+                        user=self.request.user,
+                        recipe=OuterRef('id'))),
+                is_shopping_cart=Exists(
+                    ShoppingCart.objects.filter(
+                        user=self.request.user,
+                        recipe=OuterRef('id')))
+            ).select_related('author').prefetch_related(
+                'tags', 'ingredients', 'recipe',
+                'shopping_cart', 'favorite_recipe'
+            )
+        else:
+            return Recipe.objects.annotate(
+                is_shopping_cart=Value(False),
+                is_favorited=Value(False),
+            ).select_related('author').prefetch_related(
+                'tags', 'ingredients', 'recipe',
+                'shopping_cart', 'favorite_recipe'
+            )
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+    def get_shopping_cart(self, request):
+        return request.user.shopping_cart.recipe.values(
+                'ingredients__name',
+                'ingredients__measurement_unit'
+        ).annotate(amount=Sum('recipe__amount')).order_by()
 
     @action(
         detail=False,
@@ -123,15 +134,10 @@ class RecipesViewSet(viewsets.ModelViewSet):
 
         buffer = io.BytesIO()
         page = canvas.Canvas(buffer)
-        pdfmetrics.registerFont(TTFont('Vera', 'Vera.ttf'))
+        pdfmetrics.registerFont(TTFont(FONT_NAME, FONT_FILE_NAME))
         x_position, y_position = 50, 800
-        shopping_cart = (
-            request.user.shopping_cart.recipe.
-            values(
-                'ingredients__name',
-                'ingredients__measurement_unit'
-            ).annotate(amount=Sum('recipe__amount')).order_by())
-        page.setFont('Vera', 14)
+        shopping_cart = self.get_shopping_cart(request)
+        page.setFont(FONT_NAME, FONT_SIZE)
         if shopping_cart:
             indent = 20
             page.drawString(x_position, y_position, 'Cписок покупок:')
@@ -149,7 +155,8 @@ class RecipesViewSet(viewsets.ModelViewSet):
             buffer.seek(0)
             return FileResponse(
                 buffer, as_attachment=True, filename=FILENAME)
-        page.setFont('Vera', 24)
+
+        page.setFont(FONT_NAME, FONT_SIZE)
         page.drawString(
             x_position,
             y_position,
