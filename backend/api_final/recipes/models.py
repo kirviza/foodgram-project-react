@@ -119,7 +119,9 @@ class RecipeIngredient(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=['recipe', 'ingredient'],
-                name='unique ingredient')]
+                name='unique ingredient'
+            )
+        ]
 
 
 class FavoriteRecipe(models.Model):
@@ -140,12 +142,11 @@ class FavoriteRecipe(models.Model):
         verbose_name = 'Избранное'
 
     def __str__(self):
-        list_ = [item['name'] for item in self.recipe.values('name')]
-        return f'Пользователь {self.user} добавил {list_} в избранные.'
+        fav_recipe = [item['name'] for item in self.recipe.values('name')]
+        return f'Пользователь {self.user} добавил {fav_recipe} в избранные.'
 
     @receiver(post_save, sender=User)
-    def create_favorite_recipe(
-            sender, instance, created, **kwargs):
+    def create_favorite_recipe(sender, instance, created, **kwargs):
         if created:
             return FavoriteRecipe.objects.create(user=instance)
 
@@ -174,7 +175,9 @@ class Subscribe(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'author'],
-                name='unique_subscription')]
+                name='unique_subscription'
+            )
+        ]
 
     def __str__(self):
         return f'Автор {self.author}, Подписчик {self.user}'
@@ -200,8 +203,8 @@ class ShoppingCart(models.Model):
         verbose_name = 'Покупка'
 
     def __str__(self):
-        list_ = [item['name'] for item in self.recipe.values('name')]
-        return f'Пользователь {self.user} добавил {list_} в покупки.'
+        shopping_recipe = [item['name'] for item in self.recipe.values('name')]
+        return f'Пользователь {self.user} добавил {shopping_recipe} в покупки.'
 
     @receiver(post_save, sender=User)
     def create_shopping_cart(

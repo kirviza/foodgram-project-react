@@ -14,21 +14,27 @@ from rest_framework import generics, status, viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import action, api_view
-from rest_framework.permissions import (SAFE_METHODS, AllowAny,
-                                        IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly)
+from rest_framework.permissions import (
+    SAFE_METHODS, AllowAny,
+    IsAuthenticated, IsAuthenticatedOrReadOnly
+)
 from rest_framework.response import Response
 
 from api.filters import IngredientFilter, RecipeFilter
 from api.permissions import IsAdminOrReadOnly
-from recipes.models import (FavoriteRecipe, Ingredient, Recipe, ShoppingCart,
-                            Subscribe, Tag)
+from recipes.models import (
+    FavoriteRecipe, Ingredient,
+    Recipe, ShoppingCart,
+    Subscribe, Tag
+)
 
-from .serializers import (IngredientSerializer, RecipeReadSerializer,
-                          RecipeWriteSerializer, SubscribeRecipeSerializer,
-                          SubscribeSerializer, TagSerializer, TokenSerializer,
-                          UserCreateSerializer, UserListSerializer,
-                          UserPasswordSerializer)
+from .serializers import (
+    IngredientSerializer, RecipeReadSerializer,
+    RecipeWriteSerializer, SubscribeRecipeSerializer,
+    SubscribeSerializer, TagSerializer, TokenSerializer,
+    UserCreateSerializer, UserListSerializer,
+    UserPasswordSerializer
+)
 
 User = get_user_model()
 FILENAME = 'shoppingcart.pdf'
@@ -226,7 +232,7 @@ def set_password(request):
         status=status.HTTP_400_BAD_REQUEST)
 
 
-class AddAndDeleteSubscribe(
+class SubscribeView(
         generics.RetrieveDestroyAPIView,
         generics.ListCreateAPIView):
     """Подписка и отписка от пользователя."""
@@ -266,7 +272,7 @@ class AddAndDeleteSubscribe(
         self.request.user.follower.filter(author=instance).delete()
 
 
-class AddDeleteFavoriteRecipe(
+class FavoriteRecipeView(
         GetObjectMixin,
         generics.RetrieveDestroyAPIView,
         generics.ListCreateAPIView):
@@ -282,7 +288,7 @@ class AddDeleteFavoriteRecipe(
         self.request.user.favorite_recipe.recipe.remove(instance)
 
 
-class AddDeleteShoppingCart(
+class ShoppingCartView(
         GetObjectMixin,
         generics.RetrieveDestroyAPIView,
         generics.ListCreateAPIView):
