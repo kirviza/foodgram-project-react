@@ -140,8 +140,11 @@ class FavoriteRecipe(models.Model):
         verbose_name = 'Избранное'
 
     def __str__(self):
-        fav_recipe = [item['name'] for item in self.recipe.values('name')]
-        return f'Пользователь {self.user} добавил {fav_recipe} в избранные.'
+        favorite_recipes = self.recipe.values_list('name')
+        return (
+            f'Пользователь {self.user} '
+            f'добавил {favorite_recipes} в избранные.'
+        )
 
 
 class Subscribe(models.Model):

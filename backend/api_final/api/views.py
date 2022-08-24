@@ -20,21 +20,20 @@ from rest_framework.permissions import (
 )
 from rest_framework.response import Response
 
-from api.constans import FONT_FILE_NAME, FONT_NAME, FONT_SIZE
-from api.filters import IngredientFilter, RecipeFilter
-from api.permissions import IsAdminOrReadOnly
-from recipes.models import (
-    FavoriteRecipe, Ingredient,
-    Recipe, ShoppingCart,
-    Subscribe, Tag
-)
-
+from .constans import FONT_FILE_NAME, FONT_NAME, FONT_SIZE
+from .filters import IngredientFilter, RecipeFilter
+from .permissions import IsAdminOrReadOnly
 from .serializers import (
     IngredientSerializer, RecipeReadSerializer,
     RecipeWriteSerializer, SubscribeRecipeSerializer,
     SubscribeSerializer, TagSerializer, TokenSerializer,
     UserCreateSerializer, UserListSerializer,
     UserPasswordSerializer
+)
+from recipes.models import (
+    FavoriteRecipe, Ingredient,
+    Recipe, ShoppingCart,
+    Subscribe, Tag
 )
 
 User = get_user_model()
@@ -128,7 +127,8 @@ class RecipesViewSet(viewsets.ModelViewSet):
     @action(
         detail=False,
         methods=['get'],
-        permission_classes=(IsAuthenticated,))
+        permission_classes=(IsAuthenticated,)
+    )
     def download_shopping_cart(self, request):
         """Качаем список с ингредиентами."""
 
@@ -146,21 +146,22 @@ class RecipesViewSet(viewsets.ModelViewSet):
                     x_position, y_position - indent,
                     f'{index}. {recipe["ingredients__name"]} - '
                     f'{recipe["amount"]} '
-                    f'{recipe["ingredients__measurement_unit"]}.')
+                    f'{recipe["ingredients__measurement_unit"]}.'
+                )
                 y_position -= 15
                 if y_position <= 50:
                     page.showPage()
                     y_position = 800
             page.save()
             buffer.seek(0)
-            return FileResponse(
-                buffer, as_attachment=True, filename=FILENAME)
+            return FileResponse(buffer, as_attachment=True, filename=FILENAME)
 
         page.setFont(FONT_NAME, FONT_SIZE)
         page.drawString(
             x_position,
             y_position,
-            'Cписок покупок пуст!')
+            'Cписок покупок пуст!'
+        )
         page.save()
         buffer.seek(0)
         return FileResponse(buffer, as_attachment=True, filename=FILENAME)
@@ -173,14 +174,12 @@ class UsersViewSet(UserViewSet):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        return User.objects.annotate(
-            is_subscribed=Exists(
-                self.request.user.follower.filter(
-                    author=OuterRef('id'))
-            )).prefetch_related(
-                'follower', 'following'
-        ) if self.request.user.is_authenticated else User.objects.annotate(
-            is_subscribed=Value(False))
+        if self.request.user.is_authenticated:
+            return User.objects.annotate(is_subscribed=Exists(
+                self.request.user.follower.filter(author=OuterRef('id')))
+            ).prefetch_related('follower', 'following')
+        else:
+            return User.objects.annotate(is_subscribed=Value(False))
 
     def get_serializer_class(self):
         if self.request.method.lower() == 'post':
@@ -201,8 +200,10 @@ class UsersViewSet(UserViewSet):
         queryset = Subscribe.objects.filter(user=user)
         pages = self.paginate_queryset(queryset)
         serializer = SubscribeSerializer(
-            pages, many=True,
-            context={'request': request})
+            pages,
+            many=True,
+            context={'request': request}
+        )
         return self.get_paginated_response(serializer.data)
 
 
@@ -219,7 +220,8 @@ class AuthToken(ObtainAuthToken):
         token, created = Token.objects.get_or_create(user=user)
         return Response(
             {'auth_token': token.key},
-            status=status.HTTP_201_CREATED)
+            status=status.HTTP_201_CREATED
+        )
 
 
 @api_view(['post'])
@@ -228,15 +230,18 @@ def set_password(request):
 
     serializer = UserPasswordSerializer(
         data=request.data,
-        context={'request': request})
+        context={'request': request}
+    )
     if serializer.is_valid():
         serializer.save()
         return Response(
             {'message': 'Пароль изменен!'},
-            status=status.HTTP_201_CREATED)
+            status=status.HTTP_201_CREATED
+        )
     return Response(
         {'error': 'Введите верные данные!'},
-        status=status.HTTP_400_BAD_REQUEST)
+        status=status.HTTP_400_BAD_REQUEST
+    )
 
 
 class SubscribeView(
@@ -253,7 +258,8 @@ class SubscribeView(
             'following__recipe'
         ).annotate(
             recipes_count=Count('following__recipe'),
-            is_subscribed=Value(True), )
+            is_subscribed=Value(True),
+        )
 
     def get_object(self):
         user_id = self.kwargs['user_id']
