@@ -1,4 +1,6 @@
 from django.contrib.auth import get_user_model
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.core.validators import MinValueValidator
 from django.db import models
 
@@ -146,6 +148,11 @@ class FavoriteRecipe(models.Model):
             f'добавил {favorite_recipes} в избранные.'
         )
 
+    @receiver(post_save, sender=User)
+    def create_favorite_recipe(sender, instance, created, **kwargs):
+        if created:
+            return FavoriteRecipe.objects.create(user=instance)
+
 
 class Subscribe(models.Model):
     user = models.ForeignKey(
@@ -201,3 +208,8 @@ class ShoppingCart(models.Model):
     def __str__(self):
         shopping_recipe = [item['name'] for item in self.recipe.values('name')]
         return f'Пользователь {self.user} добавил {shopping_recipe} в покупки.'
+
+    @receiver(post_save, sender=User)
+    def create_shopping_cart(sender, instance, created, **kwargs):
+        if created:
+            return ShoppingCart.objects.create(user=instance)
