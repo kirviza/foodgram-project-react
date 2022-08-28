@@ -22,6 +22,7 @@ from rest_framework.response import Response
 
 from .constans import FONT_FILE_NAME, FONT_NAME, FONT_SIZE
 from .filters import IngredientFilter, RecipeFilter
+from .paginators import LimitPageNumberPagination
 from .permissions import IsAdminOrReadOnly
 from .serializers import (
     IngredientSerializer, RecipeReadSerializer,
@@ -57,7 +58,7 @@ class PermissionAndPaginationMixin:
     """Миксина для списка тегов и ингридиентов."""
 
     permission_classes = (IsAdminOrReadOnly,)
-    pagination_class = None
+    pagination_class = (LimitPageNumberPagination,)
 
 
 class IngredientsViewSet(
@@ -85,6 +86,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     filterset_class = RecipeFilter
     permission_classes = (IsAuthenticatedOrReadOnly,)
+    pagination_class = LimitPageNumberPagination
 
     def get_serializer_class(self):
         if self.request.method in SAFE_METHODS:
