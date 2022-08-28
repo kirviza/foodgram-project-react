@@ -1,4 +1,4 @@
-FONT_NAME = 'Helvetica'
-FONT_FILE_NAME = 'BemboMTPro-Regular.ttf'
-FONT_SIZE = 16
+FONT_NAME = 'Vera'
+FONT_FILE_NAME = 'Vera.ttf'
+FONT_SIZE = 24
 PAGE_SIZE = 6

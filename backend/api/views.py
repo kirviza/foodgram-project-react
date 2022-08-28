@@ -136,7 +136,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
 
         buffer = io.BytesIO()
         page = canvas.Canvas(buffer)
-        pdfmetrics.registerFont(TTFont(FONT_NAME, 'WinAnsiEncoding'))
+        pdfmetrics.registerFont(TTFont(FONT_NAME, FONT_FILE_NAME))
         x_position, y_position = 50, 800
         shopping_cart = self.get_shopping_cart(request)
         page.setFont(FONT_NAME, FONT_SIZE)
