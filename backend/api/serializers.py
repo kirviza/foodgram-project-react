@@ -346,8 +346,7 @@ class SubscribeSerializer(serializers.ModelSerializer):
         ).data
 
     def get_recipes_count(self, obj):
-        count = obj.author.recipe.count()
-        return count
+        return obj.author.recipe.count()
 
     def get_is_subscribed(self, obj):
         return True
