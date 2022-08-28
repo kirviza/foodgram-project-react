@@ -1,4 +1,4 @@
-FONT_NAME = 'Tahoma'
-FONT_FILE_NAME = 'TAHOMA.TTF'
+FONT_NAME = 'FreeSans'
+FONT_FILE_NAME = 'FreeSans.ttf'
 FONT_SIZE = 24
 PAGE_SIZE = 6
