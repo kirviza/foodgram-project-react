@@ -100,7 +100,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
                     FavoriteRecipe.objects.filter(
                         user=self.request.user,
                         recipe=OuterRef('id'))),
-                is_shopping_cart=Exists(
+                is_in_shopping_cart=Exists(
                     ShoppingCart.objects.filter(
                         user=self.request.user,
                         recipe=OuterRef('id')))
@@ -110,7 +110,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
             )
         else:
             return Recipe.objects.annotate(
-                is_shopping_cart=Value(False),
+                is_in_shopping_cart=Value(False),
                 is_favorited=Value(False),
             ).select_related('author').prefetch_related(
                 'tags', 'ingredients', 'recipe',

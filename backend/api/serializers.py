@@ -290,7 +290,7 @@ class RecipeReadSerializer(serializers.ModelSerializer):
     is_favorited = serializers.BooleanField(
         read_only=True
     )
-    is_shopping_cart = serializers.BooleanField(
+    is_in_shopping_cart = serializers.BooleanField(
         read_only=True
     )
 
@@ -323,12 +323,8 @@ class SubscribeSerializer(serializers.ModelSerializer):
         source='author.last_name'
     )
     recipe = serializers.SerializerMethodField()
-    is_subscribed = serializers.BooleanField(
-        read_only=True
-    )
-    recipes_count = serializers.IntegerField(
-        read_only=True
-    )
+    is_subscribed = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Subscribe
@@ -348,3 +344,10 @@ class SubscribeSerializer(serializers.ModelSerializer):
             recipe,
             many=True
         ).data
+
+    def get_recipes_count(self, obj):
+        count = obj.author.recipe.count()
+        return count
+
+    def get_is_subscribed(self, obj):
+        return True
