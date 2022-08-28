@@ -58,7 +58,7 @@ class PermissionAndPaginationMixin:
     """Миксина для списка тегов и ингридиентов."""
 
     permission_classes = (IsAdminOrReadOnly,)
-    pagination_class = (LimitPageNumberPagination,)
+    pagination_class = None
 
 
 class IngredientsViewSet(
