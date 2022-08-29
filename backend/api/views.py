@@ -139,7 +139,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
         buffer = io.BytesIO()
         page = canvas.Canvas(buffer)
         reportlab.rl_config.TTFSearchPath.append(
-            str(BASE_DIR) + '/static/fonts'
+            str(BASE_DIR) + '/data/fonts'
         )
         pdfmetrics.registerFont(
             TTFont(FONT_NAME, FONT_FILE_NAME, FONT_ENCODING)
