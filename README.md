@@ -1,3 +1,5 @@
+![example workflow](https://github.com/kirviza/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg)
+
 # Продуктовый помощник Foodgram (дополнить реадми)
 
 Проект доступен по адресу ... изменено.
