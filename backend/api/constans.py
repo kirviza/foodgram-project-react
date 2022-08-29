@@ -1,4 +1,5 @@
-FONT_NAME = 'DejaVuSans'
-FONT_FILE_NAME = 'DejaVuSans.ttf'
+FONT_NAME = 'FreeSans'
+FONT_FILE_NAME = 'FreeSans.ttf'
+FONT_ENCODING = 'UTF-8'
 FONT_SIZE = 24
 PAGE_SIZE = 6

@@ -7,6 +7,7 @@ from django.db.models.expressions import Exists, OuterRef, Value
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
+import reportlab.rl_config
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
@@ -20,7 +21,13 @@ from rest_framework.permissions import (
 )
 from rest_framework.response import Response
 
-from .constans import FONT_FILE_NAME, FONT_NAME, FONT_SIZE
+from recipes.models import (
+    FavoriteRecipe, Ingredient,
+    Recipe, ShoppingCart,
+    Subscribe, Tag
+)
+from api_final.settings import BASE_DIR
+from .constans import FONT_ENCODING, FONT_FILE_NAME, FONT_NAME, FONT_SIZE
 from .filters import IngredientFilter, RecipeFilter
 from .paginators import LimitPageNumberPagination
 from .permissions import IsAdminOrReadOnly
@@ -30,11 +37,6 @@ from .serializers import (
     SubscribeSerializer, TagSerializer, TokenSerializer,
     UserCreateSerializer, UserListSerializer,
     UserPasswordSerializer
-)
-from recipes.models import (
-    FavoriteRecipe, Ingredient,
-    Recipe, ShoppingCart,
-    Subscribe, Tag
 )
 
 User = get_user_model()
@@ -136,7 +138,12 @@ class RecipesViewSet(viewsets.ModelViewSet):
 
         buffer = io.BytesIO()
         page = canvas.Canvas(buffer)
-        pdfmetrics.registerFont(TTFont(FONT_NAME, FONT_FILE_NAME, 'UTF-8'))
+        reportlab.rl_config.TTFSearchPath.append(
+            str(BASE_DIR) + '/static/fonts'
+        )
+        pdfmetrics.registerFont(
+            TTFont(FONT_NAME, FONT_FILE_NAME, FONT_ENCODING)
+        )
         x_position, y_position = 50, 800
         shopping_cart = self.get_shopping_cart(request)
         page.setFont(FONT_NAME, FONT_SIZE)
