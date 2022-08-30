@@ -87,7 +87,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
 
     queryset = Recipe.objects.all()
     filterset_class = RecipeFilter
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
     pagination_class = LimitPageNumberPagination
 
     def get_serializer_class(self):
@@ -112,8 +112,8 @@ class RecipesViewSet(viewsets.ModelViewSet):
             )
         else:
             return Recipe.objects.annotate(
-                is_in_shopping_cart=Value(False),
-                is_favorited=Value(False),
+                is_in_shopping_cart=False,
+                is_favorited=False,
             ).select_related('author').prefetch_related(
                 'tags', 'ingredients', 'recipe',
                 'shopping_cart', 'favorite_recipe'
