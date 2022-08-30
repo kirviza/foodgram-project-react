@@ -180,7 +180,7 @@ class UsersViewSet(UserViewSet):
     """Пользователи."""
 
     serializer_class = UserListSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
 
     def get_queryset(self):
         if self.request.user.is_authenticated:
