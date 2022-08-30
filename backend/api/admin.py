@@ -5,7 +5,12 @@ from recipes.models import (
     RecipeIngredient, ShoppingCart, Subscribe, Tag
 )
 
-admin.site.register(Ingredient)
+
+class IngredientAdmin(admin.ModelAdmin):
+    search_fields = ('name',)
+
+
+admin.site.register(Ingredient, IngredientAdmin)
 admin.site.register(Tag)
 admin.site.register(Recipe)
 admin.site.register(RecipeIngredient)
