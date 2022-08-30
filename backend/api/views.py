@@ -111,10 +111,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
                 'shopping_cart', 'favorite_recipe'
             )
         else:
-            return Recipe.objects.annotate(
-                is_favorited=Value(False),
-                is_in_shopping_cart=Value(False),
-            ).select_related('author').prefetch_related(
+            return Recipe.objects.select_related('author').prefetch_related(
                 'tags', 'ingredients', 'recipe',
                 'shopping_cart', 'favorite_recipe'
             )

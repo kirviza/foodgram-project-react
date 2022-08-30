@@ -288,10 +288,12 @@ class RecipeReadSerializer(serializers.ModelSerializer):
         source='recipe'
     )
     is_favorited = serializers.BooleanField(
-        read_only=True
+        read_only=True,
+        default=False
     )
     is_in_shopping_cart = serializers.BooleanField(
-        read_only=True
+        read_only=True,
+        default=False
     )
 
     class Meta:
